@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  discord-video-webhook-stack
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Parameters: 
+  BucketName: 
+    Description: Name of s3 bucket
+    Type: String
+
+Resources:
+  S3EventNotificationFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: call-discord-webhook-on-object-creation/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Timeout: 5
+      Environment:
+        Variables:
+          bucketName: !Ref BucketName
+      Architectures:
+        - x86_64
+      Events:
+        S3Event:
+          Type: S3 # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Bucket:
+              Ref: BucketName
+            Events: s3:ObjectCreated:*
+            # Filter: 
+      Policies:
+        - AWSLambdaExecute
+        - Version: '2012-10-17' 
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: !Join 
+                  - ''
+                  - - !GetAtt VideoBucket.Arn
+                    - /*
+
+  VideoBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      AccessControl: Private
+      BucketName: !Ref BucketName
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+            AllowedOrigins:
+              - '*'
+      # This template was created without specifying the notification configuring, then updating with a notification configuration
+      # See here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration.html 
+      # NotificationConfiguration:
+      #   LambdaConfigurations:
+      #     - Event: 'arn:aws:sns:us-east-1:123456789012:TestTopic'
+      #       # Filter: 's3:ReducedRedundancyLostObject'
+      #       Function: S3EventNotificationFunction
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+
+  S3BucketReadPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Policy for bucket read access
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement: 
+        - Effect: Allow
+          Action: 
+            - "s3:GetObject"
+          Resource: !Join 
+              - ''
+              - - !GetAtt VideoBucket.Arn
+                - /*
+        - Effect: Allow
+          Action: 
+            - "s3:ListObject"
+          Resource: !GetAtt VideoBucket.Arn
+
+
+Outputs:
+  GenerateUploadUrlFunction:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt GenerateUploadUrlFunction.Arn
+  GenerateUploadUrlFunctionIamRole:
+    Description: "Implicit IAM Role created for GenerateUploadUrlFunction function"
+    Value: !GetAtt GenerateUploadUrlFunctionRole.Arn
+  BucketName:
+    Value: !Ref VideoBucket
+    Description: Name of the bucket
