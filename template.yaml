@@ -17,7 +17,7 @@ Resources:
   S3EventNotificationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: call-discord-webhook-on-object-creation/
+      CodeUri: call-discord-webhook/
       Handler: app.lambda_handler
       Runtime: python3.9
       Timeout: 5
@@ -32,7 +32,8 @@ Resources:
           Properties:
             Bucket:
               Ref: BucketName
-            Events: s3:ObjectCreated:*
+            Events:
+              - 's3:ObjectCreated:*'
             # Filter: 
       Policies:
         - AWSLambdaExecute
