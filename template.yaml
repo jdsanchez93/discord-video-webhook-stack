@@ -60,13 +60,12 @@ Resources:
               - PUT
             AllowedOrigins:
               - '*'
-      # This template was created without specifying the notification configuring, then updating with a notification configuration
+      # This template was created without specifying the notification configuration, then updating with a notification configuration
       # See here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration.html 
-      # NotificationConfiguration:
-      #   LambdaConfigurations:
-      #     - Event: 'arn:aws:sns:us-east-1:123456789012:TestTopic'
-      #       # Filter: 's3:ReducedRedundancyLostObject'
-      #       Function: S3EventNotificationFunction
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Function: !Ref S3EventNotificationFunction
       PublicAccessBlockConfiguration:
         BlockPublicAcls: false
         BlockPublicPolicy: false
