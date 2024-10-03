@@ -1,24 +1,20 @@
-import json
-import boto3
-import uuid
+
 import os
 import requests
 
-
 def lambda_handler(event, context):
-    """Sample pure Lambda function
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
     bucketName = event['Records'][0]['s3']['bucket']['name']
-    objectKey = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'])
-    clipUrl = "https://" + bucket+ ".s3.us-west-1.amazonaws.com/" + key
+    objectKey = event['Records'][0]['s3']['object']['key']
+    clipUrl = "https://" + bucketName + ".s3.us-west-1.amazonaws.com/" + objectKey
+    webhookUrl = os.environ['WEBHOOK_URL']
+    # e.g. the filename
+    message = objectKey.rsplit("/", 1)[-1]
+    maskedLink = "[" + message + "](" + clipUrl + ")"
+    
+    data = {
+        'content': maskedLink
+    }
+    headers = {'Content-type': 'application/json'}
 
-    webhookUrl = os.environ['webhookUrl']
-
-    options = {method: 'POST', headers: {'Content-Type': 'application/json', 'Content-Length': dataString.length}}
-    res = requests.post(webhookUrl, json = options)
+    r = requests.post(webhookUrl, json=data, headers=headers)
+    print(r.status_code)

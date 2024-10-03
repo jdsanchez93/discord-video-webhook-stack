@@ -15,7 +15,7 @@
                 "configurationId": "testConfigRule", 
                 "object": {
                     "eTag": "1c43a0c9dcc31572b5e49c0b42f8b17f", 
-                    "key": "INSERT FILENAME HERE (e.g. receipt.png)", 
+                    "key": "clips/example.mp4", 
                     "sequencer": "0A1B2C3D4E5F678901", 
                     "size": 1024
                 }, 
@@ -23,7 +23,7 @@
                     "ownerIdentity": {
                         "principalId": "EXAMPLE"
                     }, 
-                    "name": "INSERT BUCKET NAME HERE (e.g. aws-sam-ocr-sourceimagebucket-123122312)", 
+                    "name": "MyBucket", 
                     "arn": "arn:aws:s3:::INSERT BUCKET NAME HERE (e.g. aws-sam-ocr-sourceimagebucket-123122312)"
                 }, 
                 "s3SchemaVersion": "1.0"

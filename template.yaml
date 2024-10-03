@@ -12,18 +12,21 @@ Parameters:
   BucketName: 
     Description: Name of s3 bucket
     Type: String
+  WebhookUrl:
+    Description: Discord webhook to be triggered in lambda
+    Type: String
 
 Resources:
   S3EventNotificationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: CallDiscordWebhoook/
+      CodeUri: CallDiscordWebhook/
       Handler: app.lambda_handler
       Runtime: python3.9
       Timeout: 5
       Environment:
         Variables:
-          bucketName: !Ref BucketName
+          WEBHOOK_URL: !Ref WebhookUrl
       Architectures:
         - x86_64
       Events:
