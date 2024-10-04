@@ -17,6 +17,22 @@ Parameters:
     Type: String
 
 Resources:
+  ClipBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref BucketName
+      # This template was created without specifying the notification configuration, then updating with a notification configuration
+      # See here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration.html 
+      # NotificationConfiguration:
+      #   LambdaConfigurations:
+      #     - Event: 's3:ObjectCreated:*'
+      #       Function: !Ref S3EventNotificationFunction
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
   S3EventNotificationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -29,84 +45,32 @@ Resources:
           WEBHOOK_URL: !Ref WebhookUrl
       Architectures:
         - x86_64
-      Events:
-        S3Event:
-          Type: S3 # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Bucket:
-              Ref: BucketName
-            Events:
-              - 's3:ObjectCreated:*'
-            # Filter: 
+      # Events:
+      #   S3Event:
+      #     Type: S3 # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+      #     Properties:
+      #       Bucket:
+      #         Ref: ClipBucket
+      #       Events:
+      #         - 's3:ObjectCreated:*'
+      #       # Filter: 
       Policies:
         - AWSLambdaExecute
         - Version: '2012-10-17' 
           Statement:
             - Effect: Allow
-              Action:
-                - s3:PutObject
+              Action: 
+                - "s3:GetObject"
               Resource: !Join 
                   - ''
-                  - - !GetAtt VideoBucket.Arn
+                  - - !GetAtt ClipBucket.Arn
                     - /*
-
-  VideoBucket:
-    Type: 'AWS::S3::Bucket'
-    Properties:
-      AccessControl: Private
-      BucketName: !Ref BucketName
-      CorsConfiguration:
-        CorsRules:
-          - AllowedHeaders:
-              - '*'
-            AllowedMethods:
-              - PUT
-            AllowedOrigins:
-              - '*'
-      # This template was created without specifying the notification configuration, then updating with a notification configuration
-      # See here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration.html 
-      NotificationConfiguration:
-        LambdaConfigurations:
-          - Event: 's3:ObjectCreated:*'
-            Function: !Ref S3EventNotificationFunction
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: error.html
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-
-  S3BucketReadPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      Description: Policy for bucket read access
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement: 
-        - Effect: Allow
-          Action: 
-            - "s3:GetObject"
-          Resource: !Join 
-              - ''
-              - - !GetAtt VideoBucket.Arn
-                - /*
-        - Effect: Allow
-          Action: 
-            - "s3:ListObject"
-          Resource: !GetAtt VideoBucket.Arn
-
+            - Effect: Allow
+              Action: 
+                - "s3:ListObject"
+              Resource: !GetAtt ClipBucket.Arn
 
 Outputs:
-  GenerateUploadUrlFunction:
-    Description: "Lambda Function ARN"
-    Value: !GetAtt GenerateUploadUrlFunction.Arn
-  GenerateUploadUrlFunctionIamRole:
-    Description: "Implicit IAM Role created for GenerateUploadUrlFunction function"
-    Value: !GetAtt GenerateUploadUrlFunctionRole.Arn
   BucketName:
-    Value: !Ref VideoBucket
+    Value: !Ref ClipBucket
     Description: Name of the bucket
