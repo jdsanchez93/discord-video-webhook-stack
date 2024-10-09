@@ -15,6 +15,9 @@ Parameters:
   WebhookUrl:
     Description: Discord webhook to be triggered in lambda
     Type: String
+  UserName:
+    Description: Name of IAM user
+    Type: String
 
 Resources:
   ClipBucket:
@@ -70,7 +73,38 @@ Resources:
                 - "s3:ListObject"
               Resource: !GetAtt ClipBucket.Arn
 
+  MyUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Ref UserName
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref ClipBucket
+      PolicyDocument:
+        Statement: 
+        - 
+          Action: 
+            - "S3:PutObject"
+          Effect: Allow
+          Resource: !Join 
+              - ''
+              - - !GetAtt ClipBucket.Arn
+                - /*
+          Principal:
+            AWS: !GetAtt MyUser.Arn
+
+  AccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref MyUser
+
 Outputs:
   BucketName:
     Value: !Ref ClipBucket
     Description: Name of the bucket
+  AccessKeyformyaccesskey:
+    Value: !Ref AccessKey
+  SecretKeyformyaccesskey:
+    Value: !GetAtt AccessKey.SecretAccessKey
