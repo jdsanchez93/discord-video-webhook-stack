@@ -26,10 +26,10 @@ Resources:
       BucketName: !Ref BucketName
       # This template was created without specifying the notification configuration, then updating with a notification configuration
       # See here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration.html 
-      # NotificationConfiguration:
-      #   LambdaConfigurations:
-      #     - Event: 's3:ObjectCreated:*'
-      #       Function: !Ref S3EventNotificationFunction
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Function: !GetAtt S3EventNotificationFunction.Arn
       PublicAccessBlockConfiguration:
         BlockPublicAcls: false
         BlockPublicPolicy: false
@@ -57,21 +57,30 @@ Resources:
       #       Events:
       #         - 's3:ObjectCreated:*'
       #       # Filter: 
-      Policies:
-        - AWSLambdaExecute
-        - Version: '2012-10-17' 
-          Statement:
-            - Effect: Allow
-              Action: 
-                - "s3:GetObject"
-              Resource: !Join 
-                  - ''
-                  - - !GetAtt ClipBucket.Arn
-                    - /*
-            - Effect: Allow
-              Action: 
-                - "s3:ListObject"
-              Resource: !GetAtt ClipBucket.Arn
+      # Policies:
+      #   - AWSLambdaExecute
+      #   - Version: '2012-10-17' 
+      #     Statement:
+      #       - Effect: Allow
+      #         Action: 
+      #           - "s3:GetObject"
+      #         Resource: !Join 
+      #             - ''
+      #             - - !GetAtt ClipBucket.Arn
+      #               - /*
+      #       - Effect: Allow
+      #         Action: 
+      #           - "s3:ListObject"
+      #         Resource: !GetAtt ClipBucket.Arn
+
+  s3Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt S3EventNotificationFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
+      SourceArn: !GetAtt ClipBucket.Arn
 
   MyUser:
     Type: AWS::IAM::User
