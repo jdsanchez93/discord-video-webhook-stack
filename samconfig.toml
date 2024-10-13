@@ -1,0 +1,13 @@
+version = 0.1
+[dev]
+[dev.deploy]
+[dev.deploy.parameters]
+stack_name = "discord-webhook-dev"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-10pf1mgfxlyxe"
+s3_prefix = "discord-webhook-dev"
+region = "us-east-2"
+profile = "create-ecs-service-stack"
+confirm_changeset = true
+capabilities = "CAPABILITY_NAMED_IAM"
+parameter_overrides = "BucketName=\"jd-discord-clips-test\" WebhookUrl=\"https://discord.com/api/webhooks/1291874677018595412/gMu-hqmzp7GSmOq5SrGt58aORB8G5wK4F9dXS0SEREh4yiLe5IvZvAP_QFyR5bZMp1S7\" UserName=\"discord-clip-cli-user\""
+image_repositories = []
