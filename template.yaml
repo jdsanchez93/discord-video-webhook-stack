@@ -48,30 +48,6 @@ Resources:
           WEBHOOK_URL: !Ref WebhookUrl
       Architectures:
         - x86_64
-      # Events:
-      #   S3Event:
-      #     Type: S3 # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-      #     Properties:
-      #       Bucket:
-      #         Ref: ClipBucket
-      #       Events:
-      #         - 's3:ObjectCreated:*'
-      #       # Filter: 
-      # Policies:
-      #   - AWSLambdaExecute
-      #   - Version: '2012-10-17' 
-      #     Statement:
-      #       - Effect: Allow
-      #         Action: 
-      #           - "s3:GetObject"
-      #         Resource: !Join 
-      #             - ''
-      #             - - !GetAtt ClipBucket.Arn
-      #               - /*
-      #       - Effect: Allow
-      #         Action: 
-      #           - "s3:ListObject"
-      #         Resource: !GetAtt ClipBucket.Arn
 
   s3Permission:
     Type: AWS::Lambda::Permission
@@ -103,6 +79,16 @@ Resources:
                 - /*
           Principal:
             AWS: !GetAtt MyUser.Arn
+        #TODO is this needed
+        - Effect: Allow
+          Principal: '*'
+          Action: 's3:GetObject'
+          Resource:
+            Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: ClipBucket
+                - '/*'
 
   AccessKey:
     Type: AWS::IAM::AccessKey
