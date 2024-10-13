@@ -5,7 +5,8 @@ import requests
 def lambda_handler(event, context):
     bucketName = event['Records'][0]['s3']['bucket']['name']
     objectKey = event['Records'][0]['s3']['object']['key']
-    clipUrl = "https://" + bucketName + ".s3.us-west-1.amazonaws.com/" + objectKey
+    region = event['Records'][0]['awsRegion']
+    clipUrl = "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + objectKey
     webhookUrl = os.environ['WEBHOOK_URL']
     # e.g. the filename
     message = objectKey.rsplit("/", 1)[-1]
