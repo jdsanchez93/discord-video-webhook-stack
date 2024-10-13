@@ -1,0 +1,2 @@
+# docker run -it --rm --name my-running-script -v ${PWD}:/usr/src/myapp -w /usr/src/myapp --env-file ./env-file.txt temp-local-upload:0.0.3-deleteme python s3-upload.py who_hit.mp4 jd-discord-clips-test
+docker run -it --rm --name my-running-script -v ${PWD}:/usr/src/myapp -w /usr/src/myapp --env-file ./env-file.txt temp-local-upload:0.0.3-deleteme bash
