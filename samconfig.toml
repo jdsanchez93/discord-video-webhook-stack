@@ -11,3 +11,14 @@ confirm_changeset = true
 capabilities = "CAPABILITY_NAMED_IAM"
 parameter_overrides = "BucketName=\"jd-discord-clips-test\" WebhookUrl=\"https://discord.com/api/webhooks/1291874677018595412/gMu-hqmzp7GSmOq5SrGt58aORB8G5wK4F9dXS0SEREh4yiLe5IvZvAP_QFyR5bZMp1S7\" UserName=\"discord-clip-cli-user\""
 image_repositories = []
+
+[personal-dev.deploy.parameters]
+stack_name = "personal-discord-webhook-dev"
+resolve_s3 = true
+s3_prefix = "personal-discord-webhook-dev"
+region = "us-east-2"
+profile = "create-ecs-service-stack"
+confirm_changeset = true
+capabilities = "CAPABILITY_NAMED_IAM"
+parameter_overrides = "BucketName=\"jd-discord-clips-personal-dev\" WebhookUrl=\"https://discord.com/api/webhooks/1291465552782430291/t8prV6kdU2N0sxjiTJceY1jgmIw8ISgHMfo1CWc839_8ZYnpd1JVIxs3gXfVlzwxfi59\" UserName=\"discord-clip-cli-user-personal-dev\""
+image_repositories = []
