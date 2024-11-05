@@ -18,6 +18,9 @@ Parameters:
   UserName:
     Description: Name of IAM user
     Type: String
+  CorsOrigin:
+    Description: AllowedOrigin for Cors config in S3
+    Type: String
 
 Resources:
   ClipBucket:
@@ -35,6 +38,15 @@ Resources:
         BlockPublicPolicy: false
         IgnorePublicAcls: false
         RestrictPublicBuckets: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - OPTIONS
+            AllowedOrigins:
+              - !Ref CorsOrigin
 
   S3EventNotificationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction

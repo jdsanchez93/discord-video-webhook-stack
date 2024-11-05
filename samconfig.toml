@@ -20,5 +20,5 @@ region = "us-east-2"
 profile = "create-ecs-service-stack"
 confirm_changeset = true
 capabilities = "CAPABILITY_NAMED_IAM"
-parameter_overrides = "BucketName=\"jd-discord-clips-personal-dev\" WebhookUrl=\"https://discord.com/api/webhooks/1291465552782430291/t8prV6kdU2N0sxjiTJceY1jgmIw8ISgHMfo1CWc839_8ZYnpd1JVIxs3gXfVlzwxfi59\" UserName=\"discord-clip-cli-user-personal-dev\""
+parameter_overrides = "BucketName=\"jd-discord-clips-personal-dev\" WebhookUrl=\"https://discord.com/api/webhooks/1291465552782430291/t8prV6kdU2N0sxjiTJceY1jgmIw8ISgHMfo1CWc839_8ZYnpd1JVIxs3gXfVlzwxfi59\" UserName=\"discord-clip-cli-user-personal-dev\" CorsOrigin=\"http://localhost:4200\""
 image_repositories = []
