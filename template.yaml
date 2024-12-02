@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  discord-video-webhook-stack
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Parameters: 
+  BucketName: 
+    Description: Name of s3 bucket
+    Type: String
+  WebhookUrl:
+    Description: Discord webhook to be triggered in lambda
+    Type: String
+  UserName:
+    Description: Name of IAM user
+    Type: String
+  CorsOrigin:
+    Description: AllowedOrigin for Cors config in S3
+    Type: String
+
+Resources:
+  ClipBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref BucketName
+      # This template was created without specifying the notification configuration, then updating with a notification configuration
+      # See here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-notificationconfiguration.html 
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Function: !GetAtt S3EventNotificationFunction.Arn
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - OPTIONS
+            AllowedOrigins:
+              - !Ref CorsOrigin
+
+  S3EventNotificationFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: CallDiscordWebhook/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Timeout: 5
+      Environment:
+        Variables:
+          WEBHOOK_URL: !Ref WebhookUrl
+      Architectures:
+        - x86_64
+
+  s3Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt S3EventNotificationFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
+      SourceArn: !GetAtt ClipBucket.Arn
+
+  MyUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Ref UserName
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref ClipBucket
+      PolicyDocument:
+        Statement: 
+        - 
+          Action: 
+            - "S3:PutObject"
+          Effect: Allow
+          Resource: !Join 
+              - ''
+              - - !GetAtt ClipBucket.Arn
+                - /*
+          Principal:
+            AWS: !GetAtt MyUser.Arn
+        #TODO is this needed
+        - Effect: Allow
+          Principal: '*'
+          Action: 's3:GetObject'
+          Resource:
+            Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: ClipBucket
+                - '/*'
+
+  AccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref MyUser
+
+Outputs:
+  BucketName:
+    Value: !Ref ClipBucket
+    Description: Name of the bucket
+  AccessKeyformyaccesskey:
+    Value: !Ref AccessKey
+  SecretKeyformyaccesskey:
+    Value: !GetAtt AccessKey.SecretAccessKey
